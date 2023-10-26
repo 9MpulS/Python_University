@@ -26,8 +26,6 @@ add_student(students, 7, "Ковальчук", "Анна", "Сергіївна",
 add_student(students, 8, "Гриценко", "Григорій", "Петрович", 2004, 10, 17)
 add_student(students, 9, "Лисенко", "Лідія", "Олександрівна", 2007, 6, 23)
 
-# Додайте іншу інформацію про інших учнів
-
 today = datetime.date.today()
 
 while True:
