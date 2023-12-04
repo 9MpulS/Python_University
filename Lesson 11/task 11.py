@@ -20,7 +20,6 @@ def ToFloat(string):
     except ValueError:
         return None
 
-
 def readerTodDist(reader):
     __csvlist = list(csvreader)
     return dict(zip(__csvlist[0], __csvlist[1]))
