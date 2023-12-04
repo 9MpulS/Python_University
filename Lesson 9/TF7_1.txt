@@ -1,0 +1,4 @@
+This sentence is of varying length.
+Another sentence with a few words!
+There will be a string without doubling letters.
+But this one has a doubling of letters: slovoo.
