@@ -140,7 +140,7 @@ class Minesweeper:
                     if self.minefield[r][c] == -1:
                         self.hidden_buttons[r][c].config(text="*", state=tk.DISABLED, relief=tk.SUNKEN, bg="lightgray")
             self.stop_timer()
-            messagebox.showinfo("Game Over", "You hit a mine! Game over.")
+            messagebox.showinfo("Game Over", f"Ти натрапив на міну! Гру завершено \nЧас гри: {self.elapsed_time_m}хв {self.elapsed_time_s}с")
             self.reset_game()
         else:
             self.reveal_cell(row, col)
@@ -169,7 +169,7 @@ class Minesweeper:
             self.remaining_cells -= 1
 
         if self.remaining_cells == 0:
-            messagebox.showinfo("Congratulations", "You've won the game!")
+            messagebox.showinfo("Congratulations", f"Ти знайшов всі міни! Втаю \nЧас гри: {self.elapsed_time_m}хв {self.elapsed_time_s}с")
             self.master.destroy()
 
 def main():
