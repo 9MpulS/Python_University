@@ -125,7 +125,6 @@ class Minesweeper:
             "E Показати інформацію про гру"
         )
 
-
         try:
             messagebox.showinfo("Правила гри/ Гарячі клавіші", rules_hotkeys)
 
