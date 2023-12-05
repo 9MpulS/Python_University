@@ -71,8 +71,9 @@ class Minesweeper:
         menubar = tk.Menu(self.master)
         self.master.config(menu=menubar)
 
-        menubar.add_cascade(label="Допомога", command=self.show_rules)
+        menubar.add_cascade(label="Пауза", command=self.toggle_pause)
         menubar.add_cascade(label="Перезапуск", command=self.reset_game)
+        menubar.add_cascade(label="Допомога", command=self.show_rules)
         menubar.add_cascade(label="Вихід", command=self.master.destroy)
 
         for row in range(self.rows):
@@ -82,6 +83,16 @@ class Minesweeper:
                 self.hidden_buttons[row][col] = button
 
                 button.bind("<Button-3>", lambda event, r=row, c=col: self.on_right_click(r, c))
+
+        self.master.bind("<space>", lambda event: self.toggle_pause())
+        self.master.bind("<r>", lambda event: self.reset_game())
+        self.master.bind("<e>", lambda event: self.show_rules())
+
+    def toggle_pause(self):
+        if self.timer_running:
+            self.stop_timer()
+        else:
+            self.start_timer()
 
     def reset_game(self):
         for r in range(self.rows):
@@ -96,17 +107,30 @@ class Minesweeper:
         self.elapsed_time_s = 0
         self.stop_timer()
 
-        self.timer_label.config(text="Time: 0 seconds")
+        self.timer_label.config(text="Час: 0с")
+
     def show_rules(self):
-        rules = (
+        self.stop_timer()
+
+        rules_hotkeys = (
             "Правила гри 'Сапер':\n\n"
             "1. Гравець відкриває комірки, натискаючи на них лівою кнопкою миші.\n"
             "2. Якщо комірка містить міну, гра закінчується.\n"
             "3. Якщо комірка поруч із міною, вона показує кількість сусідніх мін.\n"
             "4. Гравець може помітити клітинки, де ймовірно є міна, правою кнопкою миші.\n"
-            "5. Мета гри - відкрити всі комірки, крім тих, де є міни."
+            "5. Мета гри - відкрити всі комірки, крім тих, де є міни.\n\n"
+            "Гарячі клавіші:\n\n"
+            "Space Пауза/Продовжити гру\n"
+            "R Перезапуск гри\n"
+            "E Показати інформацію про гру"
         )
-        messagebox.showinfo("Правила гри", rules)
+
+
+        try:
+            messagebox.showinfo("Правила гри/ Гарячі клавіші", rules_hotkeys)
+
+        except tk.TclError:
+            pass
 
     def on_button_click(self, row, col):
         if not self.timer_running:
@@ -128,7 +152,7 @@ class Minesweeper:
             self.hidden_buttons[row][col].config(text="", state=tk.NORMAL, relief=tk.RAISED, bg="SystemButtonFace")
             self.flagged_cells.remove((row, col))
         else:
-            self.hidden_buttons[row][col].config(text="Х", state=tk.DISABLED, relief=tk.SUNKEN, bg="SystemButtonFace")
+            self.hidden_buttons[row][col].config(text="🚩", state=tk.NORMAL, relief=tk.RAISED, bg="SystemButtonFace")
             self.flagged_cells.add((row, col))
 
     def reveal_cell(self, row, col):
