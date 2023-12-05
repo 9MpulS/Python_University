@@ -15,6 +15,15 @@ class Minesweeper:
         self.flagged_cells = set()
 
         self.create_minefield()
+
+        self.timer_label = tk.Label(self.master, text="Час: 0 с")
+        self.timer_label.grid(row=self.rows, columnspan=self.columns)
+
+        self.elapsed_time_s = 0
+        self.elapsed_time_m = 0
+        self.timer_running = False
+        self.timer_id = None
+
         self.create_widgets()
 
     def create_minefield(self):
@@ -34,12 +43,36 @@ class Minesweeper:
                         if 0 <= row + i < self.rows and 0 <= col + j < self.columns and self.minefield[row + i][col + j] == -1:
                             self.minefield[row][col] += 1
 
+    def update_timer(self):
+        if self.timer_running:
+            self.elapsed_time_s += 1
+            if self.elapsed_time_s == 60:
+                self.elapsed_time_m += 1
+                self.elapsed_time_s = 0
+            if self.elapsed_time_m == 0:
+                self.timer_label.config(text=f"Час: {self.elapsed_time_s}с")
+            if self.elapsed_time_m >= 1:
+                self.timer_label.config(text=f"Час: {self.elapsed_time_m}хв {self.elapsed_time_s}с")
+
+            self.timer_id = self.master.after(1000, self.update_timer)
+
+    def start_timer(self):
+        if not self.timer_running:
+            self.timer_running = True
+            self.update_timer()
+
+    def stop_timer(self):
+        if self.timer_running:
+            self.timer_running = False
+            if self.timer_id:
+                self.master.after_cancel(self.timer_id)
+
     def create_widgets(self):
         menubar = tk.Menu(self.master)
         self.master.config(menu=menubar)
 
         menubar.add_cascade(label="Допомога", command=self.show_rules)
-        menubar.add_cascade(label="Перезапуск", command=self.restart_game)
+        menubar.add_cascade(label="Перезапуск", command=self.reset_game)
         menubar.add_cascade(label="Вихід", command=self.master.destroy)
 
         for row in range(self.rows):
@@ -48,16 +81,22 @@ class Minesweeper:
                 button.grid(row=row, column=col)
                 self.hidden_buttons[row][col] = button
 
-                button.bind("<Button-3>", lambda event, r=row, c=col: self.on_right_click(event, r, c))
+                button.bind("<Button-3>", lambda event, r=row, c=col: self.on_right_click(r, c))
 
     def reset_game(self):
-        for row in range(self.rows):
-            for col in range(self.columns):
-                self.hidden_buttons[row][col].config(text="", state=tk.NORMAL, relief=tk.RAISED, bg="SystemButtonFace")
+        for r in range(self.rows):
+            for c in range(self.columns):
+                self.hidden_buttons[r][c].config(text="", state=tk.NORMAL, relief=tk.RAISED, bg="SystemButtonFace")
         self.flagged_cells.clear()
+
+        self.minefield = [[0] * self.columns for _ in range(self.rows)]
         self.remaining_cells = self.rows * self.columns - self.num_mines
         self.create_minefield()
 
+        self.elapsed_time_s = 0
+        self.stop_timer()
+
+        self.timer_label.config(text="Time: 0 seconds")
     def show_rules(self):
         rules = (
             "Правила гри 'Сапер':\n\n"
@@ -69,17 +108,22 @@ class Minesweeper:
         )
         messagebox.showinfo("Правила гри", rules)
 
-    def restart_game(self):
-        self.reset_game()
-
     def on_button_click(self, row, col):
+        if not self.timer_running:
+            self.start_timer()
         if self.minefield[row][col] == -1:
-            self.reveal_mines()
-            self.game_over()
+            for r in range(self.rows):
+                for c in range(self.columns):
+                    if self.minefield[r][c] == -1:
+                        self.hidden_buttons[r][c].config(text="*", state=tk.DISABLED, relief=tk.SUNKEN, bg="lightgray")
+            self.stop_timer()
+            messagebox.showinfo("Game Over", "You hit a mine! Game over.")
+            self.reset_game()
         else:
             self.reveal_cell(row, col)
 
-    def on_right_click(self, event, row, col):
+
+    def on_right_click(self, row, col):
         if (row, col) in self.flagged_cells:
             self.hidden_buttons[row][col].config(text="", state=tk.NORMAL, relief=tk.RAISED, bg="SystemButtonFace")
             self.flagged_cells.remove((row, col))
@@ -104,16 +148,6 @@ class Minesweeper:
         if self.remaining_cells == 0:
             messagebox.showinfo("Congratulations", "You've won the game!")
             self.master.destroy()
-
-    def reveal_mines(self):
-        for row in range(self.rows):
-            for col in range(self.columns):
-                if self.minefield[row][col] == -1:
-                    self.hidden_buttons[row][col].config(text="*", state=tk.DISABLED, relief=tk.SUNKEN, bg="lightgray")
-
-    def game_over(self):
-        messagebox.showinfo("Game Over", "You hit a mine! Game over.")
-        self.master.destroy()
 
 def main():
     root = tk.Tk()
