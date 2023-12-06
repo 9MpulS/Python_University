@@ -145,14 +145,14 @@ class Minesweeper:
         else:
             self.reveal_cell(row, col)
 
-
     def on_right_click(self, row, col):
-        if (row, col) in self.flagged_cells:
-            self.hidden_buttons[row][col].config(text="", state=tk.NORMAL, relief=tk.RAISED, bg="SystemButtonFace")
-            self.flagged_cells.remove((row, col))
-        else:
-            self.hidden_buttons[row][col].config(text="🚩", state=tk.NORMAL, relief=tk.RAISED, bg="SystemButtonFace")
-            self.flagged_cells.add((row, col))
+        if self.hidden_buttons[row][col]['state'] == tk.NORMAL:
+            if (row, col) in self.flagged_cells:
+                self.hidden_buttons[row][col].config(text="", state=tk.NORMAL, relief=tk.RAISED, bg="SystemButtonFace")
+                self.flagged_cells.remove((row, col))
+            else:
+                self.hidden_buttons[row][col].config(text="🚩", state=tk.NORMAL, relief=tk.RAISED, bg="SystemButtonFace")
+                self.flagged_cells.add((row, col))
 
     def reveal_cell(self, row, col):
         if self.minefield[row][col] == 0:
