@@ -4,18 +4,22 @@ import random
 
 class Minesweeper:
     def __init__(self, master, rows, columns, num_mines):
+        # Ініціалізація класу Minesweeper з параметрами гри
         self.master = master
         self.rows = rows
         self.columns = columns
         self.num_mines = num_mines
         self.remaining_cells = rows * columns - num_mines
 
+        # Ініціалізація поля гри, кнопок та інших змінних
         self.minefield = [[0] * columns for _ in range(rows)]
         self.hidden_buttons = [[None] * columns for _ in range(rows)]
         self.flagged_cells = set()
 
+        # Генерація мін та їхнього оточення
         self.create_minefield()
 
+        # Відображення таймера
         self.timer_label = tk.Label(self.master, text="Час: 0 с")
         self.timer_label.grid(row=self.rows, columnspan=self.columns)
 
@@ -24,9 +28,11 @@ class Minesweeper:
         self.timer_running = False
         self.timer_id = None
 
+        # Створення графічного інтерфейсу
         self.create_widgets()
 
     def create_minefield(self):
+        # Генерація випадкового розташування мін та підрахунок сусідів
         mines = random.sample(range(self.rows * self.columns), self.num_mines)
         for mine in mines:
             row = mine // self.columns
@@ -44,6 +50,7 @@ class Minesweeper:
                             self.minefield[row][col] += 1
 
     def update_timer(self):
+        # Оновлення та відображення гри
         if self.timer_running:
             self.elapsed_time_s += 1
             if self.elapsed_time_s == 60:
@@ -57,17 +64,20 @@ class Minesweeper:
             self.timer_id = self.master.after(1000, self.update_timer)
 
     def start_timer(self):
+        # Запуск таймера
         if not self.timer_running:
             self.timer_running = True
             self.update_timer()
 
     def stop_timer(self):
+        # Зупинка таймера
         if self.timer_running:
             self.timer_running = False
             if self.timer_id:
                 self.master.after_cancel(self.timer_id)
 
     def create_widgets(self):
+        # Створення меню та кнопок для гри
         menubar = tk.Menu(self.master)
         self.master.config(menu=menubar)
 
@@ -78,23 +88,28 @@ class Minesweeper:
 
         for row in range(self.rows):
             for col in range(self.columns):
+                # Створення кнопок для клітинок гри
                 button = tk.Button(self.master, width=3, height=2, command=lambda r=row, c=col: self.on_button_click(r, c))
                 button.grid(row=row, column=col)
                 self.hidden_buttons[row][col] = button
 
+                # Зв'язування правого кліку мишею з функцією
                 button.bind("<Button-3>", lambda event, r=row, c=col: self.on_right_click(r, c))
 
+        # Зв'язування клавіш з функціями
         self.master.bind("<space>", lambda event: self.toggle_pause())
         self.master.bind("<r>", lambda event: self.reset_game())
         self.master.bind("<e>", lambda event: self.show_rules())
 
     def toggle_pause(self):
+        # Пауза або продовження гри
         if self.timer_running:
             self.stop_timer()
         else:
             self.start_timer()
 
     def reset_game(self):
+        # Скидання гри та розпочаток нової
         for r in range(self.rows):
             for c in range(self.columns):
                 self.hidden_buttons[r][c].config(text="", state=tk.NORMAL, relief=tk.RAISED, bg="SystemButtonFace")
@@ -110,6 +125,7 @@ class Minesweeper:
         self.timer_label.config(text="Час: 0с")
 
     def show_rules(self):
+        # Виведення вікна з правилами гри
         self.stop_timer()
 
         rules_hotkeys = (
@@ -132,6 +148,7 @@ class Minesweeper:
             pass
 
     def on_button_click(self, row, col):
+        # Обробка кліку лівою кнопкою миші
         if not self.timer_running:
             self.start_timer()
         if self.minefield[row][col] == -1:
@@ -146,6 +163,7 @@ class Minesweeper:
             self.reveal_cell(row, col)
 
     def on_right_click(self, row, col):
+        # Обробка правого кліку мишею
         if self.hidden_buttons[row][col]['state'] == tk.NORMAL:
             if (row, col) in self.flagged_cells:
                 self.hidden_buttons[row][col].config(text="", state=tk.NORMAL, relief=tk.RAISED, bg="SystemButtonFace")
@@ -155,6 +173,7 @@ class Minesweeper:
                 self.flagged_cells.add((row, col))
 
     def reveal_cell(self, row, col):
+        # Рекурсивна функція для розгортання комірок
         if self.minefield[row][col] == 0:
             self.hidden_buttons[row][col].config(state=tk.DISABLED, relief=tk.SUNKEN, bg="lightgray")
             self.remaining_cells -= 1
@@ -173,6 +192,7 @@ class Minesweeper:
             self.master.destroy()
 
 def main():
+    # Запуск головної функції
     root = tk.Tk()
     root.title("Minesweeper")
     Minesweeper(root, rows=8, columns=8, num_mines=10)
