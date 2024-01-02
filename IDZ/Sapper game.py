@@ -11,9 +11,11 @@ class Minesweeper:
         self.num_mines = num_mines
         self.remaining_cells = rows * columns - num_mines
 
-        # Ініціалізація поля гри, кнопок та інших змінних
+        # Ініціалізація списку для зберігання інформації про розташування мін
         self.minefield = [[0] * columns for _ in range(rows)]
+        # Список для зберігання кнопок інтерфейсу
         self.hidden_buttons = [[None] * columns for _ in range(rows)]
+        # Множина для зберігання координат клітинок, які гравець відзначив прапорцем
         self.flagged_cells = set()
 
         # Генерація мін та їхнього оточення
